@@ -13,8 +13,8 @@ services:
 #      - 8080:8080
       - 8675:8675
     volumes:
-      - ${APP_DATA_DIR}/ipfs:/ipfs-podcasting/ipfs
-      - ${APP_DATA_DIR}/cfg:/ipfs-podcasting/cfg
+      - ${APP_DATA_DIR}/ipfs-podcasting/ipfs:/ipfs-podcasting/ipfs
+      - ${APP_DATA_DIR}/ipfs-podcasting/cfg:/ipfs-podcasting/cfg
 #    networks:
 #      default:
 #        ipv4_address: $APP_IP
