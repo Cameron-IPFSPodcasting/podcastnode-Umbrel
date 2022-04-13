@@ -17,6 +17,11 @@ payload = { 'version': 0.5 }
 #Basic logging to ipfspodcastnode.log
 logging.basicConfig(format="%(asctime)s : %(message)s", datefmt="%Y-%m-%d %H:%M:%S", filename="ipfspodcastnode.log", filemode="w", level=logging.INFO)
 
+#Create an empty email.cfg (if it doesn't exist)
+if not os.path.exists('cfg/email.cfg'):
+  with open('cfg/email.cfg', 'w') as ecf:
+    ecf.write('')
+
 #Start WebUI
 import webui
 logging.info('Starting Web UI')
@@ -25,6 +30,9 @@ logging.info('Starting Web UI')
 if not os.path.exists('ipfs/config'):
   logging.info('Initializing IPFS')
   ipcfg = subprocess.run(ipfspath + ' init', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+#  Need to open up IPFS Web UI with the Umbrel IP
+#  ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["http:// @@@UMBREL_IP@@@ :5001", "http://localhost:3000", "http://127.0.0.1:5001", "https://webui.ipfs.io"]'
+#  ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "POST"]'
 
 #Start IPFS
 daemon = subprocess.run(ipfspath + ' daemon >/dev/null 2>&1 &', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
