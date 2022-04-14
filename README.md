@@ -17,7 +17,7 @@ Install the app...
 	
 	./scripts/app install ipfs-podcasting
 
-You can browse the Web UI at http://umbrel.local:8657/ and configure your email address to manage the node at https://ipfspodcasting.net/Manage You can also view the communication log to view activity.
+You can browse the Web UI at http://umbrel.local:8675/ and configure your email address to manage the node at https://ipfspodcasting.net/Manage You can also view the communication log to view activity.
 
 ![image](https://user-images.githubusercontent.com/103131615/163454574-e16e6d47-9c75-4174-be0b-901132cf9f17.png)
 
