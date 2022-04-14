@@ -5,12 +5,11 @@ from bottle import error, post, request, redirect, route, run, static_file
 
 with open('cfg/email.cfg', 'r') as ecf:
   email = ecf.read()
-  if email == '':
-    email = 'user@example.com'
 
 @route('/')
 def index():
-  htmlsrc = '<html><head><title>IPFS Podcast Node</title></head><body style="background-image: url(\'ipfspod.png\'); background-repeat: no-repeat; background-position: 50% 50%; font-family: \'Helvetica Neue\',Helvetica,Arial,sans-serif; font-size: 14px; margin: 1em;">'
+  htmlsrc = '<html><head><title>IPFS Podcast Node</title><meta name="viewport" content="width=device-width, initial-scale=1.0" /></head>'
+  htmlsrc += '<body style="background-image: url(\'ipfspod.png\'); background-repeat: no-repeat; background-position: 50% 50%; font-family: \'Helvetica Neue\',Helvetica,Arial,sans-serif; font-size: 14px; margin: 1em;">'
   htmlsrc += '<h2>IPFS Podcasting Node</h2>'
   htmlsrc += 'Enter your email to manage this node at <a href="https://ipfspodcasting.net/Manage" target="_blank">IPFSPodcasting.net</a>'
   htmlsrc += '<form action="/" method="post" style="margin-top: 0.5em;">'
