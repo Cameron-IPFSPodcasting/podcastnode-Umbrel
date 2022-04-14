@@ -17,11 +17,11 @@ Install the app...
 	
 	./scripts/app install ipfs-podcasting
 
-You can browse the Web UI at http://umbrel.local:8657 and configure your email address to manage the node at https://ipfspodcasting.net/Manage You can also view the communication log to view activity.
+You can browse the Web UI at http://umbrel.local:8657/ and configure your email address to manage the node at https://ipfspodcasting.net/Manage You can also view the communication log to view activity.
 
 ![image](https://user-images.githubusercontent.com/103131615/163454574-e16e6d47-9c75-4174-be0b-901132cf9f17.png)
 
-The app will not appear on your umbrel dashboard, but it will show Disk and memory usage with a broken image icon (because it's not an official app).
+The app will not appear on your Umbrel dashboard, but it will show disk and memory usage with a broken image icon (because it's not an official app).
 
 ![image](https://user-images.githubusercontent.com/103131615/163454975-e0b52b3c-a6bf-42ce-920b-291091c00c0f.png)
 
