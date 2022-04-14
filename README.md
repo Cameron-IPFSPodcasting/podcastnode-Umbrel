@@ -25,29 +25,28 @@ The app will not appear on your umbrel dashboard, but it will show Disk and memo
 
 ![image](https://user-images.githubusercontent.com/103131615/163454975-e0b52b3c-a6bf-42ce-920b-291091c00c0f.png)
 
-To unstall the app...
+To unstall the app (!!! This will delete your IPFS configuration and all the files in your IPFS repository !!!)...
 
 	./scripts/app uninstall ipfs-podcasting
-
-@@@ WARNING @@@ This will delete your IPFS configuration and all the files in your IPFS repository.
 
 
 Other useful commands (from the "~/umbrel" directory)...
 
 Stop the app...
 
-  ./scripts/app stop ipfs-podcasting
+	./scripts/app stop ipfs-podcasting
 
 Download a new docker image...
 
-  docker pull ipfspodcasting/podcastnode:v0.5
+	docker pull ipfspodcasting/podcastnode:v0.5
 
 Start the app...
 
-  ./scripts/app start ipfs-podcasting
+	./scripts/app start ipfs-podcasting
 
 Launch a command shell to execute IPFS commands...
 
-  docker exec -ti ipfs-podcasting_web_1 sh
+	docker exec -ti ipfs-podcasting_web_1 sh
 
-If your Umbrel is behind a firewall, you may need allow traffic to port 4001 (both tcp/upd source/destination ports from your Umbrel IP address).
+
+*If your Umbrel is behind a firewall, you may need allow traffic to port 4001 (both tcp/upd source/destination ports from your Umbrel IP address).
