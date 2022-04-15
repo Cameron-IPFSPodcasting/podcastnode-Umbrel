@@ -4,7 +4,7 @@ import json
 import requests
 import time
 import logging
-import os.path
+import os
 
 #bin Paths
 ipfspath = '/usr/local/bin/ipfs'
@@ -31,10 +31,12 @@ if not os.path.exists('ipfs/config'):
   logging.info('Initializing IPFS')
   ipfs_init = subprocess.run(ipfspath + ' init', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 #  Need to open up IPFS Web UI CORS with the Umbrel $HOST_IP
-#  ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["http:// $HOST_IP :5001", "http://localhost:3000", "http://127.0.0.1:5001", "https://webui.ipfs.io"]'
-#  ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "POST"]'
-#  And open the port on the $LOCAL_IP
-#  ipfs config --json Addresses.API '["/ip4/127.0.0.1/tcp/5001", "/ip4/ $LOCAL_IP /tcp/5001"]'
+#  api_cors = subprocess.run(ipfspath + ' config --json API.HTTPHeaders.Access-Control-Allow-Origin \'["http:// ###HOST_IP### :5001", "http://umbrel.local:5001", "http://localhost:3000", "http://127.0.0.1:5001", "https://webui.ipfs.io"]\'', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  api_cors = subprocess.run(ipfspath + ' config --json API.HTTPHeaders.Access-Control-Allow-Origin \'["*"]\'', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  api_meth = subprocess.run(ipfspath + ' config --json API.HTTPHeaders.Access-Control-Allow-Methods \'["PUT", "POST"]\'', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  #Open the port on the $LOCAL_IP
+  LOCAL_IP = os.getenv('LOCAL_IP')
+  listen_addr = subprocess.run(ipfspath + ' config --json Addresses.API \'["/ip4/127.0.0.1/tcp/5001", "/ip4/' + LOCAL_IP + '/tcp/5001"]\'', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 #Start IPFS
 daemon = subprocess.run(ipfspath + ' daemon >/dev/null 2>&1 &', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
