@@ -25,7 +25,7 @@ The app will not appear on your Umbrel dashboard, but it will show disk and memo
 
 ![image](https://user-images.githubusercontent.com/103131615/163454975-e0b52b3c-a6bf-42ce-920b-291091c00c0f.png)
 
-To unstall the app (!!! This will delete your IPFS configuration and all the files in your IPFS repository !!!)...
+To uninstall the app (!!! This will delete your IPFS configuration and all the files in your IPFS repository !!!)...
 
 	./scripts/app uninstall ipfs-podcasting
 
