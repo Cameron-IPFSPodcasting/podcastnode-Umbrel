@@ -27,12 +27,14 @@ def index():
   htmlsrc += '<meta name="viewport" content="width=device-width, initial-scale=1.0" />'
   htmlsrc += '<style>'
   htmlsrc += 'body { background-image: url("ipfspod.png"); background-repeat: no-repeat; background-position: 50% 50%; font-family: "Helvetica Neue",Helvetica,Arial,sans-serif; font-size: 14px; margin: 1em; } '
-  htmlsrc += 'form { margin-top: 0.5em; width: fit-content; } '
-  htmlsrc += 'form label { display: inline-block; width: 150px; text-align: right; } '
+  htmlsrc += 'form { margin-top: 0.5em; width: fit-content; background-color: darkgray; border-radius: 10px; padding: 10px; box-shadow: 0px 0px 5px 1px black; opacity: 0.9; } '
+  htmlsrc += 'form label { display: inline-block; width: 130px; text-align: right; } '
   htmlsrc += 'form input { margin: 4px; } '
   htmlsrc += 'form button { margin-left: 70%; white-space: nowrap; } '
-  htmlsrc += 'button { padding: 5px; } '
+  htmlsrc += 'form a { background-color: lightgray; padding: 5px; margin-right: 5px; font-weight: bold; border-radius: 10px; display: inline-block; font-size: 9pt; text-decoration: none; } '
+  htmlsrc += 'button { clear: both; padding: 5px; float: right; } '
   htmlsrc += 'pre { border-radius: 20px; background-color: darkcyan; color: white; opacity: 0.6; padding: 10px; overflow: auto; height: 50%; display: flex; flex-direction: column-reverse; box-shadow: 0px 0px 5px 1px black; white-space: break-spaces; } '
+  htmlsrc += 'div#links a { background-color: lightgray; margin: 4px; padding: 5px 13px; font-weight: bold; border-radius: 10px; display: inline-block; font-size: 9pt; text-decoration: none; } '
   htmlsrc += '</style>'
   htmlsrc += '</head>'
   htmlsrc += '<body>'
@@ -42,19 +44,19 @@ def index():
     htmlsrc += '<label>IPFS ID : </label> <b>' + str(ipfs_id) + '</b><br/>'
 
   htmlsrc += '<form action="/" method="post">'
-  htmlsrc += '<label>Node E-Mail (optional) : </label><input id="email" name="email" type="email" placeholder="user@example.com" required title="E-mail Address" value="' + email + '" />'
+  htmlsrc += '<label title="E-mail Address (optional)"><a href="https://ipfspodcasting.net/help/email" target="_blank">?</a>Node E-Mail : </label><input style="width: 190px;" id="email" name="email" type="email" placeholder="user@example.com" title="E-mail Address (optional)" value="' + email + '" />'
   if storageMax != '':
-    htmlsrc += '<br/><label title="IPFS Datastore Limit">IPFS "StorageMax" : </label><input  style="width: 50px;" id="storageMax" name="storageMax" type="number" min="1" max="999" pattern="[1-999]" required title="IPFS Datastore Limit" value="' + str(storageMax) + '" />GB'
+    htmlsrc += '<br/><label title="IPFS Datastore Limit">IPFS "StorageMax" : </label><input style="width: 50px; text-align: right;" id="storageMax" name="storageMax" type="number" min="1" max="999" pattern="[1-999]" required title="IPFS Datastore Limit" value="' + str(storageMax) + '" />GB'
 
-  htmlsrc += '<br/><button>Save Changes</button>'
-  htmlsrc += '</form>'
+  htmlsrc += '<button>Save Changes</button>'
+  htmlsrc += '<div style="clear: both;"></div></form>'
   htmlsrc += '<hr/><h3>Log Messages</h3><pre>'
   with open('ipfspodcastnode.log', 'r') as pcl:
     logtxt = pcl.read()
     htmlsrc += html.escape(logtxt)
   htmlsrc += '</pre>'
-  htmlsrc += '<a id="ipfsui" href="http://umbrel.local:5001/webui" target="_new">IPFS WebUI</a> | <a href="https://ipfspodcasting.net/faq" target="_new">IPFS Podcasting FAQ</a>'
-  htmlsrc += '<script>window.setTimeout( function() { window.location.reload(); }, 60000); document.getElementById("ipfsui").href=window.location.href; document.getElementById("ipfsui").href=document.getElementById("ipfsui").href.replace("8675", "5001/webui");</script>'
+  htmlsrc += '<div id="links"><a id="ipfsui" href="http://umbrel.local:5001/webui" target="_blank">IPFS WebUI</a><a id="ipfspn" href="http://umbrel.local:5001/webui/#/pins" target="_blank">Pinned Files</a><a href="https://ipfspodcasting.net/Manage" target="_blank">Manage</a><a href="https://ipfspodcasting.net/faq" target="_blank">FAQ</a></div>'
+  htmlsrc += '<script>window.setTimeout( function() { window.location.reload(); }, 60000); document.getElementById("ipfsui").href=window.location.href; document.getElementById("ipfsui").href=document.getElementById("ipfsui").href.replace("8675", "5001/webui"); document.getElementById("ipfspn").href=window.location.href; document.getElementById("ipfspn").href=document.getElementById("ipfspn").href.replace("8675", "5001/webui/#/pins");</script>'
   htmlsrc += '</body></html>'
   return htmlsrc
 
