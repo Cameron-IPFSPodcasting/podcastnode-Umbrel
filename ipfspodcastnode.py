@@ -75,7 +75,7 @@ while True:
   #Request work
   logging.info('Requesting Work...')
   try:
-    response = requests.post("https://IPFSPodcasting.net/Request", data=payload)
+    response = requests.post("https://IPFSPodcasting.net/Request", timeout=120, data=payload)
     work = json.loads(response.text)
     logging.info('Response : ' + str(work))
   except requests.ConnectionError as e:
@@ -122,7 +122,7 @@ while True:
     #Report Results
     logging.info('Reporting results...')
     try:
-      response = requests.post("https://IPFSPodcasting.net/Response", data=payload)
+      response = requests.post("https://IPFSPodcasting.net/Response", timeout=120, data=payload)
     except requests.ConnectionError as e:
       logging.info('Connection error during response : ' + str(e))
 

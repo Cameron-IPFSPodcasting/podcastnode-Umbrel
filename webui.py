@@ -35,6 +35,9 @@ def index():
   htmlsrc += 'button { clear: both; padding: 5px; float: right; } '
   htmlsrc += 'pre { border-radius: 20px; background-color: darkcyan; color: white; opacity: 0.6; padding: 10px; overflow: auto; height: 50%; display: flex; flex-direction: column-reverse; box-shadow: 0px 0px 5px 1px black; white-space: break-spaces; } '
   htmlsrc += 'div#links a { background-color: lightgray; margin: 4px; padding: 5px 13px; font-weight: bold; border-radius: 10px; display: inline-block; font-size: 9pt; text-decoration: none; } '
+  htmlsrc += 'div#tmr { height: 3px; margin-bottom: 0.5em; background-color: lightblue; animation: tbar 60s linear; } '
+  htmlsrc += '@keyframes tbar { 0% { width: 0%; } 90% { background-color: cornflowerblue; } 100% { width: 100%; background-color: red; } } '
+
   htmlsrc += '</style>'
   htmlsrc += '</head>'
   htmlsrc += '<body>'
@@ -47,15 +50,15 @@ def index():
   htmlsrc += '<label title="E-mail Address (optional)"><a href="https://ipfspodcasting.net/help/email" target="_blank">?</a>Node E-Mail : </label><input style="width: 190px;" id="email" name="email" type="email" placeholder="user@example.com" title="E-mail Address (optional)" value="' + email + '" />'
   if storageMax != '':
     htmlsrc += '<br/><label title="IPFS Datastore Limit">IPFS "StorageMax" : </label><input style="width: 50px; text-align: right;" id="storageMax" name="storageMax" type="number" min="1" max="999" pattern="[1-999]" required title="IPFS Datastore Limit" value="' + str(storageMax) + '" />GB'
-
   htmlsrc += '<button>Save Changes</button>'
   htmlsrc += '<div style="clear: both;"></div></form>'
-  htmlsrc += '<hr/><h3>Log Messages</h3><pre>'
+
+  htmlsrc += '<h3>Log Messages</h3><pre>'
   with open('ipfspodcastnode.log', 'r') as pcl:
     logtxt = pcl.read()
     htmlsrc += html.escape(logtxt)
   htmlsrc += '</pre>'
-  htmlsrc += '<div id="links"><a id="ipfsui" href="http://umbrel.local:5001/webui" target="_blank">IPFS WebUI</a><a id="ipfspn" href="http://umbrel.local:5001/webui/#/pins" target="_blank">Pinned Files</a><a href="https://ipfspodcasting.net/Manage" target="_blank">Manage</a><a href="https://ipfspodcasting.net/faq" target="_blank">FAQ</a></div>'
+  htmlsrc += '<div id="tmr"></div><div id="links"><a id="ipfsui" href="http://umbrel.local:5001/webui" target="_blank">IPFS WebUI</a><a id="ipfspn" href="http://umbrel.local:5001/webui/#/pins" target="_blank">Pinned Files</a><a href="https://ipfspodcasting.net/Manage" target="_blank">Manage</a><a href="https://ipfspodcasting.net/faq" target="_blank">FAQ</a></div>'
   htmlsrc += '<script>window.setTimeout( function() { window.location.reload(); }, 60000); document.getElementById("ipfsui").href=window.location.href; document.getElementById("ipfsui").href=document.getElementById("ipfsui").href.replace("8675", "5001/webui"); document.getElementById("ipfspn").href=window.location.href; document.getElementById("ipfspn").href=document.getElementById("ipfspn").href.replace("8675", "5001/webui/#/pins");</script>'
   htmlsrc += '</body></html>'
   return htmlsrc
