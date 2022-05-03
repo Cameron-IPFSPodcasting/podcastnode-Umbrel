@@ -10,11 +10,8 @@ services:
     ports:
       - 4001:4001  # IPFS
       - 5001:5001  # IPFS UI
-#      - 8080:8080
-      - ${APP_IPFSPOD_PORT}:8675  # Web UI
+      - 8675:8675  # Web UI
     volumes:
-#      - ${APP_DATA_DIR}/ipfs-podcasting/ipfs:/ipfs-podcasting/ipfs
-#      - ${APP_DATA_DIR}/ipfs-podcasting/cfg:/ipfs-podcasting/cfg
       - ${APP_DATA_DIR}/ipfs:/ipfs-podcasting/ipfs
       - ${APP_DATA_DIR}/cfg:/ipfs-podcasting/cfg
     environment:
