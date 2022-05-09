@@ -11,9 +11,6 @@ ipfspath = '/usr/local/bin/ipfs'
 wgetpath = '/usr/bin/wget'
 wcpath = '/usr/bin/wc'
 
-#Request payload
-payload = { 'version': 0.5 }
-
 #Basic logging to ipfspodcastnode.log
 logging.basicConfig(format="%(asctime)s : %(message)s", datefmt="%Y-%m-%d %H:%M:%S", filename="ipfspodcastnode.log", filemode="w", level=logging.INFO)
 
@@ -50,11 +47,14 @@ time.sleep(10)
 with open('ipfs/config', 'r') as ipcfg:
   ipconfig = ipcfg.read()
   jtxt = json.loads(ipconfig)
-  payload['ipfs_id'] = jtxt['Identity']['PeerID']
-  logging.info('IPFS ID : ' + payload['ipfs_id'])
+  logging.info('IPFS ID : ' + jtxt['Identity']['PeerID'])
 
 #Main loop
 while True:
+
+  #Request payload
+  payload = { 'version': 0.5, 'ipfs_id': jtxt['Identity']['PeerID'] }
+
   #Read E-mail Config
   with open('cfg/email.cfg', 'r') as ecf:
     email = ecf.read()
