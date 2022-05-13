@@ -13,7 +13,7 @@ FROM python:slim-buster AS bundle
 WORKDIR /ipfs-podcasting
 RUN apt-get update
 RUN apt-get install -y wget net-tools
-RUN pip3 install --no-cache-dir requests thread6 bottle
+RUN pip3 install --no-cache-dir requests thread6 bottle beaker
 RUN mkdir /ipfs-podcasting/cfg
 RUN mkdir /ipfs-podcasting/ipfs
 ENV IPFS_PATH=/ipfs-podcasting/ipfs

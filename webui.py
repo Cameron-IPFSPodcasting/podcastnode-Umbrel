@@ -2,10 +2,21 @@
 import os
 import json
 import html
+import random
+import string
 import threading
 import subprocess
-from bottle import error, post, request, redirect, route, run, static_file
+from bottle import app, error, post, request, redirect, route, run, static_file
+from beaker.middleware import SessionMiddleware
 
+session_opts = {
+  'session.type': 'file',
+  'session.data_dir': './cfg/',
+  'session.auto': True,
+}
+sapp = SessionMiddleware(app(), session_opts)
+sess = request.environ.get('beaker.session')
+ 
 ipfspath = '/usr/local/bin/ipfs'
 
 with open('cfg/email.cfg', 'r') as ecf:
@@ -46,7 +57,12 @@ def index():
   if ipfs_id != '':
     htmlsrc += '<label>IPFS ID : </label> <b>' + str(ipfs_id) + '</b><br/>'
 
+  sess = request.environ.get('beaker.session')
+  sess['csrf'] = ''.join(random.choice(string.ascii_letters) for i in range(12))
+  sess.save()
+
   htmlsrc += '<form action="/" method="post">'
+  htmlsrc += '<input id="csrf" name="csrf" type="hidden" value="' + sess['csrf'] + '" />'
   htmlsrc += '<label title="E-mail Address (optional)"><a href="https://ipfspodcasting.net/help/email" target="_blank">?</a>Node E-Mail : </label><input style="width: 190px;" id="email" name="email" type="email" placeholder="user@example.com" title="E-mail Address (optional)" value="' + email + '" />'
   if storageMax != '':
     htmlsrc += '<br/><label title="IPFS Datastore Limit">IPFS "StorageMax" : </label><input style="width: 50px; text-align: right;" id="storageMax" name="storageMax" type="number" min="1" max="999" pattern="[1-999]" required title="IPFS Datastore Limit" value="' + str(storageMax) + '" />GB'
@@ -58,21 +74,26 @@ def index():
     logtxt = pcl.read()
     htmlsrc += html.escape(logtxt)
   htmlsrc += '</pre>'
-  htmlsrc += '<div id="tmr"></div><div id="links"><a id="ipfsui" href="http://umbrel.local:5001/webui" target="_blank">IPFS WebUI</a><a id="ipfspn" href="http://umbrel.local:5001/webui/#/pins" target="_blank">Pinned Files</a><a href="https://ipfspodcasting.net/Manage" target="_blank">Manage</a><a href="https://ipfspodcasting.net/faq" target="_blank">FAQ</a></div>'
-  htmlsrc += '<script>window.setTimeout( function() { window.location.reload(); }, 60000); document.getElementById("ipfsui").href=window.location.href; document.getElementById("ipfsui").href=document.getElementById("ipfsui").href.replace("8675", "5001/webui"); document.getElementById("ipfspn").href=window.location.href; document.getElementById("ipfspn").href=document.getElementById("ipfspn").href.replace("8675", "5001/webui/#/pins");</script>'
+  htmlsrc += '<div id="tmr"></div><div id="links"><a href="https://ipfspodcasting.net/Manage" target="_blank">Manage</a><a href="https://ipfspodcasting.net/faq" target="_blank">FAQ</a></div>'
+  #<a id="ipfsui" href="http://umbrel.local:5001/webui" target="_blank">IPFS WebUI</a><a id="ipfspn" href="http://umbrel.local:5001/webui/#/pins" target="_blank">Pinned Files</a>
+  htmlsrc += '<script>window.setTimeout( function() { window.location.reload(); }, 60000); </script>'
+  #document.getElementById("ipfsui").href=window.location.href; document.getElementById("ipfsui").href=document.getElementById("ipfsui").href.replace("8675", "5001/webui"); document.getElementById("ipfspn").href=window.location.href; document.getElementById("ipfspn").href=document.getElementById("ipfspn").href.replace("8675", "5001/webui/#/pins");
   htmlsrc += '</body></html>'
   return htmlsrc
 
 @post('/')
 def do_email():
-  global email
-  email = request.forms.get('email')
-  with open('cfg/email.cfg', 'w') as ecf:
-    ecf.write(email)
+  csrf = request.forms.get('csrf')
+  sess = request.environ.get('beaker.session')
+  if csrf == sess['csrf']:
+    global email
+    email = request.forms.get('email')
+    with open('cfg/email.cfg', 'w') as ecf:
+      ecf.write(email)
 
-  global storageMax
-  storageMax = request.forms.get('storageMax')
-  api_dstore = subprocess.run(ipfspath + ' config --json Datastore.StorageMax \'"' + storageMax + 'GB"\'', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    global storageMax
+    storageMax = request.forms.get('storageMax')
+    api_dstore = subprocess.run(ipfspath + ' config --json Datastore.StorageMax \'"' + storageMax + 'GB"\'', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
   redirect('/')
 
@@ -81,4 +102,4 @@ def server_static():
     return static_file('ipfspod.png', root='')
 
 #run(host='0.0.0.0', port=8675, debug=True)
-threading.Thread(target=run, kwargs=dict(host='0.0.0.0', port=8675, debug=False)).start()
+threading.Thread(target=run, kwargs=dict(host='0.0.0.0', port=8675, app=sapp, debug=False)).start()
