@@ -1,29 +1,37 @@
 ### Build Stage
 FROM python:slim-buster AS build
-WORKDIR /ipfs-podcasting
-RUN apt-get update
-RUN apt-get install -y wget
+
+ARG IPFSGO=v0.12.2
 ARG TARGETARCH
-RUN wget https://dist.ipfs.io/go-ipfs/v0.12.2/go-ipfs_v0.12.2_linux-$TARGETARCH.tar.gz
-RUN tar xzf go-ipfs_v0.12.2_linux-$TARGETARCH.tar.gz
-RUN cp go-ipfs/ipfs /usr/local/bin
+
+WORKDIR /ipfs-podcasting
+
+RUN apt-get update; \
+    apt-get install -y --no-install-recommends wget \
+    && wget -q https://dist.ipfs.io/go-ipfs/${IPFSGO}/go-ipfs_${IPFSGO}_linux-$TARGETARCH.tar.gz \
+    && tar xzf go-ipfs_${IPFSGO}_linux-$TARGETARCH.tar.gz \
+    && cp go-ipfs/ipfs /usr/local/bin \
+    && rm -rf go-ipfs_${IPFSGO}_linux-$TARGETARCH.tar.gz go-ipfs \
+    && rm -rf /var/lib/apt/lists/*
 
 ### Bundle Stage
 FROM python:slim-buster AS bundle
-WORKDIR /ipfs-podcasting
-RUN apt-get update
-RUN apt-get install -y wget net-tools
-RUN pip3 install --no-cache-dir requests thread6 bottle beaker
-RUN mkdir /ipfs-podcasting/cfg
-RUN mkdir /ipfs-podcasting/ipfs
+
 ENV IPFS_PATH=/ipfs-podcasting/ipfs
-COPY --from=build /usr/local/bin/ipfs /usr/local/bin
-COPY *.py .
-COPY *.png .
-RUN chown -R 1000:1000 /ipfs-podcasting
-USER 1000
+ARG USERID=1000
+WORKDIR /ipfs-podcasting
+
+RUN apt-get update; \
+    apt-get install -y --no-install-recommends wget net-tools \
+    && rm -rf /var/lib/apt/lists/* \
+    && pip3 install --no-cache-dir requests thread6 bottle beaker \
+    && mkdir /ipfs-podcasting/cfg /ipfs-podcasting/ipfs \
+    && chown -R ${USERID}:${USERID} /ipfs-podcasting
+
+COPY --from=build /usr/local/bin/ipfs /usr/local/bin/
+COPY *.py *.png ./
+
+USER ${USERID}
 ENTRYPOINT ["python", "ipfspodcastnode.py"]
-EXPOSE 4001
-EXPOSE 5001
+EXPOSE 4001/tcp 5001/tcp 8675/tcp
 #EXPOSE 8080
-EXPOSE 8675
