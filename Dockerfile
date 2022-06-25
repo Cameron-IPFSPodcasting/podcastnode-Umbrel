@@ -1,7 +1,7 @@
 ### Build Stage
 FROM python:slim-buster AS build
 
-ARG IPFSGO=v0.12.2
+ARG IPFSGO=v0.13.0
 ARG TARGETARCH
 
 WORKDIR /ipfs-podcasting
