@@ -19,25 +19,17 @@ if not os.path.exists('cfg/email.cfg'):
   with open('cfg/email.cfg', 'w') as ecf:
     ecf.write('')
 
-#Start WebUI
-import webui
-logging.info('Starting Web UI')
-
 #Init IPFS (if necessary)
 if not os.path.exists('ipfs/config'):
   logging.info('Initializing IPFS')
   ipfs_init = subprocess.run(ipfspath + ' init', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-#IP Addresses may change between reboots, so reconfigure every reboot.
-#Open up IPFS Web UI CORS with the Umbrel $HOST_IP
-#HOST_IP = os.getenv('HOST_IP')
-#api_cors = subprocess.run(ipfspath + ' config --json API.HTTPHeaders.Access-Control-Allow-Origin \'["http://' + HOST_IP + ':5001", "http://umbrel.local:5001", "http://localhost:3000", "http://127.0.0.1:5001", "https://webui.ipfs.io"]\'', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-#api_cors = subprocess.run(ipfspath + ' config --json API.HTTPHeaders.Access-Control-Allow-Origin \'["*"]\'', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-#api_meth = subprocess.run(ipfspath + ' config --json API.HTTPHeaders.Access-Control-Allow-Methods \'["PUT", "POST"]\'', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+#Start WebUI
+import webui
+logging.info('Starting Web UI')
+
+#Automatically discover relays and advertise relay addresses when behind NAT.
 swarmnat = subprocess.run(ipfspath + ' config --json Swarm.RelayClient.Enabled true', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-#Open the port on the $LOCAL_IP
-#LOCAL_IP = os.getenv('LOCAL_IP')
-#listen_addr = subprocess.run(ipfspath + ' config --json Addresses.API \'["/ip4/127.0.0.1/tcp/5001", "/ip4/' + LOCAL_IP + '/tcp/5001"]\'', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 #Start IPFS
 daemon = subprocess.run(ipfspath + ' daemon >/dev/null 2>&1 &', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -54,7 +46,7 @@ with open('ipfs/config', 'r') as ipcfg:
 while True:
 
   #Request payload
-  payload = { 'version': 0.5, 'ipfs_id': jtxt['Identity']['PeerID'] }
+  payload = { 'version': 0.6, 'ipfs_id': jtxt['Identity']['PeerID'] }
 
   #Read E-mail Config
   with open('cfg/email.cfg', 'r') as ecf:
@@ -75,36 +67,61 @@ while True:
     daemon = subprocess.run(ipfspath + ' daemon >/dev/null 2>&1 &', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     logging.info('@@@ IPFS NOT RUNNING !!! Restarting Daemon @@@')
 
+  #Get Peer Count
+  peercnt = 0
+  speers = subprocess.run(ipfspath + ' swarm peers|wc -l', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+  if speers.returncode == 0:
+    peercnt = speers.stdout.decode().strip()
+  payload['peers'] = peercnt
+
   #Request work
   logging.info('Requesting Work...')
   try:
     response = requests.post("https://IPFSPodcasting.net/Request", timeout=120, data=payload)
     work = json.loads(response.text)
     logging.info('Response : ' + str(work))
-  except requests.ConnectionError as e:
-    logging.info('Connection error during request : ' + str(e))
+  except requests.RequestException as e:
+    logging.info('Error during request : ' + str(e))
+    work = { 'message': 'Request Error' }
 
-  if work['message'][0:7] != 'No Work':
+  if work['message'] == 'Request Error':
+    logging.info('Error requesting work from IPFSPodcasting.net (check internet / firewall / router).')
+
+  elif work['message'][0:7] != 'No Work':
     if work['download'] != '' and work['filename'] != '':
       logging.info('Downloading ' + str(work['download']))
-      #Download any "downloads" and Add to IPFS
-      hash = subprocess.run(wgetpath + ' -q --no-check-certificate "' + work['download'] + '" -O - | ' + ipfspath + ' add -q -w --stdin-name "' + work['filename'] + '"', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      downhash=hash.stdout.decode().strip().split('\n')
-      if hash.returncode == 0:
+      #Download any "downloads" and Add to IPFS (1hr48min timeout)
+      try:
+        hash = subprocess.run(wgetpath + ' -q --no-check-certificate "' + work['download'] + '" -O - | ' + ipfspath + ' add -q -w --stdin-name "' + work['filename'] + '"', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=6500)
+        hashcode = hash.returncode
+      except subprocess.SubprocessError as e:
+        logging.info('Error downloading/pinning episode : ' + str(e))
+        hashcode = 99
+
+      if hashcode == 0:
         #Get file size (for validation)
+        downhash=hash.stdout.decode().strip().split('\n')
         size = subprocess.run(ipfspath + ' cat ' + downhash[0] + ' | ' + wcpath + ' -c', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         downsize=size.stdout.decode().strip()
         logging.info('Added to IPFS ( hash : ' + str(downhash[0]) + ' length : ' + str(downsize) + ')')
         payload['downloaded'] = downhash[0] + '/' + downhash[1]
         payload['length'] = downsize
       else:
-        payload['error'] = hash.returncode
+        payload['error'] = hashcode
 
     if work['pin'] != '':
       #Directly pin if already in IPFS
       logging.info('Pinning hash (' + str(work['pin']) + ')')
-      pin = subprocess.run(ipfspath + ' pin add ' + work['pin'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      if pin.returncode == 0:
+      try:
+        pin = subprocess.run(ipfspath + ' pin add ' + work['pin'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=6500)
+        pincode = pin.returncode
+      except subprocess.SubprocessError as e:
+        logging.info('Error direct pinning : ' + str(e))
+        #Clean up any other pin commands that may have spawned
+        cleanup = subprocess.run('kill `ps aux|grep "ipfs pin ad[d]"|awk \'{ print $2 }\'`', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        pincode = 98
+
+      if pincode == 0:
         #Verify Success and return full CID & Length
         pinchk = subprocess.run(ipfspath + ' ls ' + work['pin'], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if pinchk.returncode == 0:
@@ -114,7 +131,7 @@ while True:
         else:
           payload['error'] = pinchk.returncode
       else:
-        payload['error'] = pin.returncode
+        payload['error'] = pincode
 
     if work['delete'] != '':
       #Delete/unpin any expired episodes
@@ -124,10 +141,21 @@ while True:
 
     #Report Results
     logging.info('Reporting results...')
+    #Get Usage/Available
+    repostat = subprocess.run(ipfspath + ' repo stat -s|grep RepoSize', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if repostat.returncode == 0:
+      repolen = repostat.stdout.decode().strip().split(':')
+      used = int(repolen[1].strip())
+    else:
+      used = 0
+    payload['used'] = used
+    df = os.statvfs('/')
+    payload['avail'] = df.f_bavail * df.f_frsize
+
     try:
       response = requests.post("https://IPFSPodcasting.net/Response", timeout=120, data=payload)
-    except requests.ConnectionError as e:
-      logging.info('Connection error during response : ' + str(e))
+    except requests.RequestException as e:
+      logging.info('Error sending response : ' + str(e))
 
   else:
     logging.info('No work.')
