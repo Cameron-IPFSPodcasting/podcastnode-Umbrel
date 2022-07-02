@@ -22,7 +22,7 @@ ARG USERID=1000
 WORKDIR /ipfs-podcasting
 
 RUN apt-get update; \
-    apt-get install -y --no-install-recommends wget net-tools \
+    apt-get install -y --no-install-recommends wget net-tools proc-ps \
     && rm -rf /var/lib/apt/lists/* \
     && pip3 install --no-cache-dir requests thread6 bottle beaker \
     && mkdir /ipfs-podcasting/cfg /ipfs-podcasting/ipfs \
