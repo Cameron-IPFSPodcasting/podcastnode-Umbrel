@@ -36,4 +36,3 @@ COPY *.py *.png ./
 USER ${USERID}
 ENTRYPOINT ["python", "ipfspodcastnode.py"]
 EXPOSE 4001/tcp 5001/tcp 8675/tcp
-#EXPOSE 8080
