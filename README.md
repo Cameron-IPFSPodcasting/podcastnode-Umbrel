@@ -38,7 +38,7 @@ If you have an Umbrel device and would like to participate, you can use the Web 
 
 4. You can browse the Web UI at <http://umbrel.local:8675/> and configure your email address to manage the node at <https://ipfspodcasting.net/Manage> You can also view the communication log to view activity.
 
-![image](https://user-images.githubusercontent.com/103131615/163454574-e16e6d47-9c75-4174-be0b-901132cf9f17.png)
+![image](https://user-images.githubusercontent.com/103131615/181925105-82fafb97-ed07-4071-b709-e9aef6a05f60.png)
 
 ## Uninstall via Umbrel CLI
 
